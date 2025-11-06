@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 1Fi SDE1 Assignment — Fullstack Runnable Project
 
 This is a runnable fullstack project tailored for the 1Fi SDE1 assignment.
@@ -21,6 +20,4 @@ This is a runnable fullstack project tailored for the 1Fi SDE1 assignment.
    - npm run dev
    - Open http://localhost:5173
 
-=======
 # 1fi-sde1-assignment
->>>>>>> 0e2afbff4c137b66bcb9e4da4a5430ea228a648a

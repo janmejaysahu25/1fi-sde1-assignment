@@ -10,7 +10,7 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
-connectDB(process.env.MONGODB_URI || 'mongodb://localhost:27017/1fi_assignment');
+connectDB(process.env.MONGODB_URI || 'mongodb://localhost:27017/onefi_store');
 
 app.use('/api/products', productRoutes);
 
