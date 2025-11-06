@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { signupUser } from "../api/api"; // make sure the path is correct
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -10,48 +11,52 @@ export default function Signup() {
     mobile: "",
   });
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setError("");
+    setSuccess("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ✅ Validation
+    // ✅ Frontend Validation
     if (!form.name || !form.email || !form.password || !form.mobile) {
       setError("All fields are required!");
       return;
     }
-
     if (!/^\S+@\S+\.\S+$/.test(form.email)) {
       setError("Enter a valid email address.");
       return;
     }
-
     if (form.password.length < 6) {
       setError("Password must be at least 6 characters.");
       return;
     }
-
     if (!/^\d{10}$/.test(form.mobile)) {
       setError("Mobile number must be 10 digits.");
       return;
     }
 
-    // ✅ Save user
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
+    try {
+      setLoading(true);
+      const res = await signupUser(form); // ✅ call the api function
 
-    if (users.find((u) => u.email === form.email)) {
-      setError("Email already registered.");
-      return;
+      if (res.success) {
+        setSuccess("Account created successfully! Redirecting...");
+        setTimeout(() => navigate("/signin"), 1500);
+      } else {
+        setError(res.error || "Signup failed.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Server error. Try again.");
+    } finally {
+      setLoading(false);
     }
-
-    users.push(form);
-    localStorage.setItem("users", JSON.stringify(users));
-
-    // ✅ Navigate to signin
-    navigate("/signin");
   };
 
   return (
@@ -62,6 +67,7 @@ export default function Signup() {
         </h2>
 
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+        {success && <p className="text-green-600 text-center mb-4">{success}</p>}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
@@ -91,21 +97,22 @@ export default function Signup() {
             className="px-4 py-3 rounded-xl border focus:ring-2 focus:ring-sky-500 focus:outline-none"
           />
 
-          {/* ✅ Mobile number field */}
           <input
             type="text"
             name="mobile"
             placeholder="Mobile Number"
             value={form.mobile}
             onChange={handleChange}
+            maxLength={10}
             className="px-4 py-3 rounded-xl border focus:ring-2 focus:ring-sky-500 focus:outline-none"
           />
 
           <button
             type="submit"
-            className="bg-sky-600 text-white py-3 rounded-xl font-semibold hover:bg-sky-700 transition"
+            disabled={loading}
+            className="bg-sky-600 text-white py-3 rounded-xl font-semibold hover:bg-sky-700 transition disabled:opacity-50"
           >
-            Sign Up
+            {loading ? "Signing up..." : "Sign Up"}
           </button>
         </form>
 

@@ -16,16 +16,18 @@ export default function ProductGallery({ images = [] }) {
   const handleImageError = (e) => (e.currentTarget.src = fallbackImg);
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 w-full">
+    <div className="flex flex-col md:flex-row gap-4 w-full">
       {/* DESKTOP THUMBNAILS */}
-      <div className="hidden md:flex flex-col gap-4 overflow-y-auto max-h-[420px] pr-2">
+      <div className="hidden md:flex flex-col gap-3 overflow-y-auto max-h-[400px] pr-1 -ml-2">
         {allImages.map((img, idx) => (
           <div
             key={idx}
-            className={`w-20 h-20 cursor-pointer rounded-lg overflow-hidden border transition-transform duration-200
-              ${mainImg === img
-                ? "border-sky-600 ring-2 ring-sky-400 scale-105"
-                : "border-gray-300 hover:scale-105 hover:border-sky-300"}`}
+            className={`w-16 h-16 cursor-pointer rounded-md overflow-hidden border transition-transform duration-200
+              ${
+                mainImg === img
+                  ? "border-sky-600 ring-2 ring-sky-400 scale-105"
+                  : "border-gray-300 hover:scale-105 hover:border-sky-300"
+              }`}
             onClick={() => setMainImg(img)}
           >
             <img
@@ -49,14 +51,16 @@ export default function ProductGallery({ images = [] }) {
       </div>
 
       {/* MOBILE THUMBNAILS */}
-      <div className="md:hidden flex gap-4 overflow-x-auto snap-x pb-3 mt-4 hide-scrollbar">
+      <div className="md:hidden flex gap-3 overflow-x-auto snap-x pb-3 mt-3 pl-2 hide-scrollbar">
         {allImages.map((img, idx) => (
           <div
             key={idx}
-            className={`flex-shrink-0 w-[90px] h-[90px] cursor-pointer rounded-xl overflow-hidden border transition-transform duration-200 snap-start
-              ${mainImg === img
-                ? "border-sky-600 ring-2 ring-sky-300 scale-105"
-                : "border-gray-300 hover:scale-105 hover:border-sky-400"}`}
+            className={`flex-shrink-0 w-[75px] h-[75px] cursor-pointer rounded-lg overflow-hidden border transition-transform duration-200 snap-start
+              ${
+                mainImg === img
+                  ? "border-sky-600 ring-2 ring-sky-300 scale-105"
+                  : "border-gray-300 hover:scale-105 hover:border-sky-400"
+              }`}
             onClick={() => setMainImg(img)}
           >
             <img

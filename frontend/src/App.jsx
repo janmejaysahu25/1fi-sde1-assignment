@@ -6,6 +6,8 @@ import Checkout from "./pages/Checkout";
 import Signin from "./pages/Signin";
 import Signup from "./pages/Signup";
 import Navbar from "./components/Navbar";
+import OrderSuccess from "./pages/OrderSuccess";
+
 
 export default function App() {
   return (
@@ -16,6 +18,8 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/products/:slug" element={<ProductPage />} />
           <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order-success" element={<OrderSuccess />} />
+
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
         </Routes>

@@ -1,22 +1,41 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const OrderSchema = new Schema({
-  orderId: { type: String, required: true, unique: true },
-  productSlug: { type: String, required: true },
-  variantId: { type: String },
-  planId: { type: String },
-  amount: { type: Number, required: true },
-  tenureMonths: { type: Number },
-  interestRatePercent: { type: Number },
-  customer: {
-    name: String,
-    email: String,
-    phone: String,
-    address: String
+const OrderSchema = new Schema(
+  {
+    orderId: { type: String, required: true, unique: true },
+    productSlug: { type: String, required: true },
+    planId: { type: String, required: true },
+    amount: { type: Number, required: true }, // total amount or EMI total
+    customer: {
+      name: String,
+      email: String,
+      phone: String,
+      address: String,
+      pincode: String,
+    },
+    product: {
+      name: String,
+      brand: String,
+      seller: String,
+    },
+    variant: {
+      variantId: String,
+      name: String,
+      color: String,
+      storage: String,
+      price: Number,
+    },
+    emiPlan: {
+      planId: String,
+      tenureMonths: Number,
+      interestRatePercent: Number,
+      monthlyAmount: Number,
+      totalPayable: Number,
+    },
+    status: { type: String, default: "Pending" },
   },
-  status: { type: String, enum: ['pending', 'processing', 'completed', 'cancelled'], default: 'pending' },
-  createdAt: { type: Date, default: Date.now }
-});
+  { timestamps: true }
+);
 
-module.exports = mongoose.model('Order', OrderSchema);
+module.exports = mongoose.model("Order", OrderSchema);
