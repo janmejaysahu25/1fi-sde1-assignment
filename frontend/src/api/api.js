@@ -1,6 +1,8 @@
 import axios from "axios";
 
-// Base URL: use .env value if available, fallback to local backend
+// ==================== CONFIG ====================
+// Use .env variable for backend URL in production
+// Fallback to localhost for local dev
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000/api";
 
 // Axios instance
@@ -17,21 +19,28 @@ const api = axios.create({
 export const fetchProducts = async () => {
   try {
     const res = await api.get("/products");
-    return res.data.data || res.data;
+    // Backend returns { success: true, data: [...] }
+    return res.data?.data || [];
   } catch (err) {
-    console.error("❌ Error fetching products:", err.response?.data || err.message);
-    throw err;
+    console.error(
+      "❌ Error fetching products:",
+      err.response?.data || err.message
+    );
+    return []; // Return empty array instead of throwing, so frontend doesn't crash
   }
 };
 
-// Fetch product by slug
+// Fetch single product by slug
 export const fetchProductBySlug = async (slug) => {
   try {
     const res = await api.get(`/products/${slug}`);
-    return res.data.data || res.data;
+    return res.data?.data || null;
   } catch (err) {
-    console.error("❌ Error fetching product:", err.response?.data || err.message);
-    throw err;
+    console.error(
+      "❌ Error fetching product:",
+      err.response?.data || err.message
+    );
+    return null;
   }
 };
 
@@ -43,13 +52,13 @@ export const postCheckout = async (payload) => {
     const customerId = localStorage.getItem("customerId");
     if (!customerId) throw new Error("User not logged in / customerId missing");
 
-    const res = await api.post("/checkout", {
-      ...payload,
-      customerId,
-    });
+    const res = await api.post("/checkout", { ...payload, customerId });
     return res.data;
   } catch (err) {
-    console.error("❌ Error during checkout:", err.response?.data || err.message);
+    console.error(
+      "❌ Error during checkout:",
+      err.response?.data || err.message
+    );
     throw err;
   }
 };
@@ -61,19 +70,17 @@ export const signupUser = async (user) => {
   try {
     const res = await api.post("/auth/signup", user);
 
-    if (res.data.success && res.data.customerId) {
+    if (res.data?.success && res.data?.customerId) {
       localStorage.setItem("customerId", res.data.customerId);
     }
 
     return res.data;
   } catch (err) {
-    console.error("❌ Error signing up:", err.response?.data || err.message);
-
-    // Return structured error so frontend can handle it
-    return {
-      success: false,
-      error: err.response?.data?.error || "Server error during signup",
-    };
+    console.error(
+      "❌ Error signing up:",
+      err.response?.data || err.message
+    );
+    return { success: false, error: err.response?.data?.error || "Server error during signup" };
   }
 };
 
@@ -82,19 +89,17 @@ export const loginUser = async (credentials) => {
   try {
     const res = await api.post("/auth/signin", credentials);
 
-    if (res.data.success && res.data.customerId) {
+    if (res.data?.success && res.data?.customerId) {
       localStorage.setItem("customerId", res.data.customerId);
     }
 
     return res.data;
   } catch (err) {
-    console.error("❌ Error logging in:", err.response?.data || err.message);
-
-    // Return structured error
-    return {
-      success: false,
-      error: err.response?.data?.error || "Server error during login",
-    };
+    console.error(
+      "❌ Error logging in:",
+      err.response?.data || err.message
+    );
+    return { success: false, error: err.response?.data?.error || "Server error during login" };
   }
 };
 
