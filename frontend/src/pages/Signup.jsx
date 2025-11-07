@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signupUser } from "../api/api"; // make sure the path is correct
+import Swal from "sweetalert2";
+import { signupUser } from "../api/api"; // ✅ make sure path is correct
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -10,50 +11,54 @@ export default function Signup() {
     password: "",
     mobile: "",
   });
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setError("");
-    setSuccess("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ✅ Frontend Validation
+    // Frontend Validation
     if (!form.name || !form.email || !form.password || !form.mobile) {
-      setError("All fields are required!");
+      Swal.fire("Error", "All fields are required!", "error");
       return;
     }
     if (!/^\S+@\S+\.\S+$/.test(form.email)) {
-      setError("Enter a valid email address.");
+      Swal.fire("Error", "Enter a valid email address.", "error");
       return;
     }
     if (form.password.length < 6) {
-      setError("Password must be at least 6 characters.");
+      Swal.fire("Error", "Password must be at least 6 characters.", "error");
       return;
     }
     if (!/^\d{10}$/.test(form.mobile)) {
-      setError("Mobile number must be 10 digits.");
+      Swal.fire("Error", "Mobile number must be 10 digits.", "error");
       return;
     }
 
     try {
       setLoading(true);
-      const res = await signupUser(form); // ✅ call the api function
+      const res = await signupUser(form);
 
+      // ✅ Check response correctly
       if (res.success) {
-        setSuccess("Account created successfully! Redirecting...");
-        setTimeout(() => navigate("/signin"), 1500);
+        Swal.fire("Success", "Account created successfully!", "success").then(() =>
+          navigate("/signin")
+        );
+      } else if (res.error) {
+        Swal.fire("Error", res.error, "error"); // Email or mobile already exists
       } else {
-        setError(res.error || "Signup failed.");
+        Swal.fire("Error", "Signup failed. Try again.", "error");
       }
     } catch (err) {
-      console.error(err);
-      setError(err.message || "Server error. Try again.");
+      console.error("❌ Error signing up:", err);
+      Swal.fire(
+        "Error",
+        err.response?.data?.error || "Server error. Try again.",
+        "error"
+      );
     } finally {
       setLoading(false);
     }
@@ -66,9 +71,6 @@ export default function Signup() {
           Create Account
         </h2>
 
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-        {success && <p className="text-green-600 text-center mb-4">{success}</p>}
-
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             type="text"
@@ -78,7 +80,6 @@ export default function Signup() {
             onChange={handleChange}
             className="px-4 py-3 rounded-xl border focus:ring-2 focus:ring-sky-500 focus:outline-none"
           />
-
           <input
             type="email"
             name="email"
@@ -87,7 +88,6 @@ export default function Signup() {
             onChange={handleChange}
             className="px-4 py-3 rounded-xl border focus:ring-2 focus:ring-sky-500 focus:outline-none"
           />
-
           <input
             type="password"
             name="password"
@@ -96,7 +96,6 @@ export default function Signup() {
             onChange={handleChange}
             className="px-4 py-3 rounded-xl border focus:ring-2 focus:ring-sky-500 focus:outline-none"
           />
-
           <input
             type="text"
             name="mobile"

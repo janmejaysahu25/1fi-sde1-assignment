@@ -12,6 +12,11 @@ exports.signup = async (req, res) => {
 
     const existing = await Customer.findOne({ email });
     if (existing) return res.status(400).json({ error: "Email already exists" });
+    const existingMobile = await Customer.findOne({ mobile });
+    if (existingMobile) {
+      return res.status(400).json({ error: "Mobile number already exists" });
+    }
+
 
     const hashedPassword = await bcrypt.hash(password, 10);
 

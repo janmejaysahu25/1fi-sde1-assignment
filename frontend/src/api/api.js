@@ -68,7 +68,12 @@ export const signupUser = async (user) => {
     return res.data;
   } catch (err) {
     console.error("❌ Error signing up:", err.response?.data || err.message);
-    throw err;
+
+    // Return structured error so frontend can handle it
+    return {
+      success: false,
+      error: err.response?.data?.error || "Server error during signup",
+    };
   }
 };
 
@@ -84,7 +89,12 @@ export const loginUser = async (credentials) => {
     return res.data;
   } catch (err) {
     console.error("❌ Error logging in:", err.response?.data || err.message);
-    throw err;
+
+    // Return structured error
+    return {
+      success: false,
+      error: err.response?.data?.error || "Server error during login",
+    };
   }
 };
 
