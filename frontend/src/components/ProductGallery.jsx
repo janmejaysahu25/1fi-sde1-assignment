@@ -6,10 +6,17 @@ export default function ProductGallery({ images = [] }) {
   const [mainImg, setMainImg] = useState(fallbackImg);
   const [allImages, setAllImages] = useState([fallbackImg]);
 
+  // ✅ Filter out empty/invalid images
   useEffect(() => {
     if (images && images.length > 0) {
-      setAllImages(images);
-      setMainImg(images[0]);
+      const validImages = images
+        .filter((img) => img && img.trim() !== "")
+        .map((img) => img.trim());
+      setAllImages(validImages.length > 0 ? validImages : [fallbackImg]);
+      setMainImg(validImages[0] || fallbackImg);
+    } else {
+      setAllImages([fallbackImg]);
+      setMainImg(fallbackImg);
     }
   }, [images]);
 
@@ -18,15 +25,14 @@ export default function ProductGallery({ images = [] }) {
   return (
     <div className="flex flex-col md:flex-row gap-4 w-full">
       {/* DESKTOP THUMBNAILS */}
-      <div className="hidden md:flex flex-col gap-3 overflow-y-auto max-h-[400px] pr-1 -ml-2">
+      <div className="hidden md:flex flex-col gap-3 overflow-y-auto max-h-[500px] pr-1">
         {allImages.map((img, idx) => (
           <div
             key={idx}
             className={`w-16 h-16 cursor-pointer rounded-md overflow-hidden border transition-transform duration-200
-              ${
-                mainImg === img
-                  ? "border-sky-600 ring-2 ring-sky-400 scale-105"
-                  : "border-gray-300 hover:scale-105 hover:border-sky-300"
+              ${mainImg?.trim() === img?.trim()
+                ? "border-sky-600 ring-2 ring-sky-400 scale-105"
+                : "border-gray-300 hover:scale-105 hover:border-sky-300"
               }`}
             onClick={() => setMainImg(img)}
           >
@@ -34,7 +40,7 @@ export default function ProductGallery({ images = [] }) {
               src={img}
               alt={`Thumb ${idx}`}
               onError={handleImageError}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </div>
         ))}
@@ -51,15 +57,14 @@ export default function ProductGallery({ images = [] }) {
       </div>
 
       {/* MOBILE THUMBNAILS */}
-      <div className="md:hidden flex gap-3 overflow-x-auto snap-x pb-3 mt-3 pl-2 hide-scrollbar">
+      <div className="md:hidden flex gap-3 overflow-x-auto snap-x pb-3 mt-3 pl-2">
         {allImages.map((img, idx) => (
           <div
             key={idx}
             className={`flex-shrink-0 w-[75px] h-[75px] cursor-pointer rounded-lg overflow-hidden border transition-transform duration-200 snap-start
-              ${
-                mainImg === img
-                  ? "border-sky-600 ring-2 ring-sky-300 scale-105"
-                  : "border-gray-300 hover:scale-105 hover:border-sky-400"
+              ${mainImg?.trim() === img?.trim()
+                ? "border-sky-600 ring-2 ring-sky-300 scale-105"
+                : "border-gray-300 hover:scale-105 hover:border-sky-400"
               }`}
             onClick={() => setMainImg(img)}
           >
@@ -67,7 +72,7 @@ export default function ProductGallery({ images = [] }) {
               src={img}
               alt={`Thumb ${idx}`}
               onError={handleImageError}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </div>
         ))}

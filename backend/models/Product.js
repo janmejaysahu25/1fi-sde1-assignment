@@ -34,7 +34,10 @@ const ProductSchema = new Schema({
   price: Number, // base price (optional, can be min of variants)
   currency: { type: String, default: 'INR' },
   images: [String],
-  specs: { type: Map, of: String },
+specs: {
+  type: Object,
+  default: {},
+},
   variants: [VariantSchema], // variants now include EMI plans
 }, { timestamps: true });
 

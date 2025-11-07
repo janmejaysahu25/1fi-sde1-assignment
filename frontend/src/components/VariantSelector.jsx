@@ -3,6 +3,23 @@ import React from "react";
 export default function VariantSelector({ variants = [], selected, onChange }) {
   if (!variants.length) return null;
 
+  // ✅ Define desired color order
+  const colorOrder = ["orange", "black", "silver"];
+
+  // ✅ Get unique colors
+  const uniqueColors = [...new Set(variants.map((v) => v.color))];
+
+  // ✅ Sort colors according to colorOrder, others come after
+  const sortedColors = uniqueColors.sort((a, b) => {
+    const indexA = colorOrder.findIndex(c => a.toLowerCase().includes(c));
+    const indexB = colorOrder.findIndex(c => b.toLowerCase().includes(c));
+
+    if (indexA === -1 && indexB === -1) return 0; // both not in order → keep original
+    if (indexA === -1) return 1; // a not in order → after b
+    if (indexB === -1) return -1; // b not in order → after a
+    return indexA - indexB; // both in order → sort by order
+  });
+
   return (
     <div className="flex flex-col gap-4">
 
@@ -10,7 +27,7 @@ export default function VariantSelector({ variants = [], selected, onChange }) {
       <div>
         <p className="text-xs text-gray-500 mb-2">Color</p>
         <div className="flex gap-2 flex-wrap">
-          {[...new Set(variants.map((v) => v.color))].map((color) => (
+          {sortedColors.map((color) => (
             <button
               key={color}
               onClick={() => {
@@ -23,7 +40,6 @@ export default function VariantSelector({ variants = [], selected, onChange }) {
                   : "bg-white text-gray-700 border-gray-300 hover:border-sky-300"
               }`}
             >
-              {/* ✅ Tiny color dot */}
               <span
                 className="w-3 h-3 rounded-full border"
                 style={{

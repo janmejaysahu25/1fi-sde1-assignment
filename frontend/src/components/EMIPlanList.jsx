@@ -1,7 +1,6 @@
 import React from "react";
 
 export default function EMIPlanList({ plans = [], selected, onChange, price, mrp }) {
-  // Fallback if no plans
   if (!plans || plans.length === 0) {
     return (
       <div className="text-center text-gray-400 py-4 text-sm">
@@ -10,14 +9,13 @@ export default function EMIPlanList({ plans = [], selected, onChange, price, mrp
     );
   }
 
-  // Optional: calculate discount percentage if price & mrp provided
   const discountPercent = price && mrp && mrp > price
     ? Math.round(((mrp - price) / mrp) * 100)
     : 0;
 
   return (
     <div className="space-y-3">
-      {/* Optional Price + Discount at top */}
+      {/* Optional Price + Discount */}
       {price && (
         <div className="flex items-center gap-2 mb-2">
           <span className="text-2xl font-bold text-gray-900">
@@ -44,10 +42,10 @@ export default function EMIPlanList({ plans = [], selected, onChange, price, mrp
           <div
             key={plan.planId}
             onClick={() => onChange(plan)}
-            className={`cursor-pointer rounded-lg p-3 border shadow-sm transition-all duration-200 ${
+            className={`cursor-pointer rounded-xl p-4 border shadow-sm transition-all duration-200 hover:shadow-md ${
               isSelected
                 ? "border-sky-500 bg-sky-50 shadow-md"
-                : "border-gray-200 bg-white hover:shadow-md"
+                : "border-gray-200 bg-white"
             }`}
           >
             <div className="flex items-start gap-3">
@@ -60,14 +58,12 @@ export default function EMIPlanList({ plans = [], selected, onChange, price, mrp
                       : "border-gray-300 bg-white"
                   }`}
                 >
-                  {isSelected && (
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
-                  )}
+                  {isSelected && <div className="w-2 h-2 bg-white rounded-full"></div>}
                 </div>
               </div>
 
               {/* EMI Content */}
-              <div className="flex-1">
+              <div className="flex-1 space-y-1">
                 {/* Monthly Amount & Tenure */}
                 <div className="flex items-center justify-between">
                   <div className="text-lg font-semibold text-gray-900">
@@ -91,15 +87,17 @@ export default function EMIPlanList({ plans = [], selected, onChange, price, mrp
 
                 {/* Additional Cashback */}
                 {plan.cashbackAmount > 0 && (
-                  <div className="flex items-center justify-between mt-2">
-                    <div className="text-sm text-green-700 font-semibold">
-                      💰 Additional Cashback ₹{Number(plan.cashbackAmount).toLocaleString()}
-                    </div>
-                    {plan.description && (
-                      <div className="text-xs text-gray-500 text-right">
-                        {plan.description}
-                      </div>
-                    )}
+                  <div className="mt-1 flex items-center justify-start gap-2">
+                    <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                      💰 ₹{Number(plan.cashbackAmount).toLocaleString()} Cashback
+                    </span>
+                  </div>
+                )}
+
+                {/* Plan description */}
+                {plan.description && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    {plan.description}
                   </div>
                 )}
 

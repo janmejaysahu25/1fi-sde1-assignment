@@ -71,3 +71,13 @@ exports.signin = async (req, res) => {
     return res.status(500).json({ error: "Server error" });
   }
 };
+
+
+exports.logout = (req, res) => {
+  // If you are using token-based auth, frontend should remove token from localStorage
+  // Optionally, you can blacklist token here if using JWT
+  return res.status(200).json({
+    success: true,
+    message: "Logged out successfully",
+  });
+};

@@ -20,7 +20,18 @@ export default function Signin() {
       const res = await loginUser(form); // ✅ call backend
       if (res.success) {
         console.log("Login success:", res);
-        localStorage.setItem("customerId", res.customerId);
+
+        // Save full user info in localStorage
+        const userData = {
+          customerId: res.customerId,
+          name: res.name,
+          email: res.email,
+        };
+        localStorage.setItem("currentUser", JSON.stringify(userData));
+
+        // Trigger storage event to update Navbar instantly
+        window.dispatchEvent(new Event("storage"));
+
         navigate("/"); // redirect to homepage or checkout
       } else {
         setError(res.error || "Login failed");

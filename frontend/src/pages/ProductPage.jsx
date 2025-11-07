@@ -14,7 +14,7 @@ export default function ProductPage() {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [error, setError] = useState(null);
 
-  // Fetch product
+  // ==================== FETCH PRODUCT ====================
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -27,26 +27,33 @@ export default function ProductPage() {
           return;
         }
         setProduct(productData);
-        setSelectedVariant(productData.variants?.[0] || null);
+
+        // ✅ Only set default variant if none selected
+        if (!selectedVariant) {
+          setSelectedVariant(productData.variants?.[0] || null);
+        }
       })
       .catch(() => setError("Unable to load product"))
       .finally(() => setLoading(false));
   }, [slug]);
 
-  // Reset selected EMI plan on variant change
-  useEffect(() => {
-    if (selectedVariant) {
-      // Add ₹7,500 additional cashback to each EMI plan dynamically
-      const emiWithCashback = selectedVariant.emiPlans?.map((plan) => ({
-        ...plan,
-        cashbackAmount: 7500,
-      }));
-      setSelectedVariant({ ...selectedVariant, emiPlans: emiWithCashback });
-      setSelectedPlan(emiWithCashback?.[0] || null);
-    }
-  }, [selectedVariant?.variantId]);
+  // ==================== EMI PLANS WITH CASHBACK ====================
+  const emiPlansWithCashback = useMemo(() => {
+    if (!selectedVariant?.emiPlans) return [];
+    return selectedVariant.emiPlans.map((plan) => ({
+      ...plan,
+      cashbackAmount: 7500, // Fixed cashback
+    }));
+  }, [selectedVariant]);
 
-  // Derived options
+  // ✅ Only set default EMI plan if none selected
+  useEffect(() => {
+    if (emiPlansWithCashback.length > 0 && !selectedPlan) {
+      setSelectedPlan(emiPlansWithCashback[0]);
+    }
+  }, [emiPlansWithCashback, selectedPlan]);
+
+  // ==================== VARIANT OPTIONS ====================
   const colorOptions = useMemo(() => {
     if (!product?.variants) return [];
     const seen = new Set();
@@ -68,6 +75,7 @@ export default function ProductPage() {
     if (v) setSelectedVariant(v);
   };
 
+  // ==================== HANDLE PROCEED ====================
   const handleProceed = () => {
     if (!selectedVariant || !selectedPlan) return;
 
@@ -77,7 +85,8 @@ export default function ProductPage() {
         productSlug: product.slug,
         productName: product.name,
         variantId: selectedVariant.variantId,
-        variantName: selectedVariant.name || `${selectedVariant.color} ${selectedVariant.storage}`,
+        variantName:
+          selectedVariant.name || `${selectedVariant.color} ${selectedVariant.storage}`,
         planId: selectedPlan.planId,
         tenureMonths: selectedPlan.tenureMonths,
         monthlyAmount: selectedPlan.monthlyAmount,
@@ -88,11 +97,48 @@ export default function ProductPage() {
     navigate("/checkout");
   };
 
-  if (loading) return <div className="text-center py-12">Loading product...</div>;
-  if (error) return <div className="text-center py-12 text-red-600">{error}</div>;
-  if (!product) return <div className="text-center py-12">No product data</div>;
+  // ==================== HANDLE ADD TO CART ====================
+  const handleAddToCart = () => {
+    if (!selectedVariant) return;
+    const cartItem = {
+      productSlug: product.slug,
+      productName: product.name,
+      variantId: selectedVariant.variantId,
+      variantName:
+        selectedVariant.name || `${selectedVariant.color} ${selectedVariant.storage}`,
+      price: selectedVariant.price,
+      quantity: 1,
+      planId: selectedPlan?.planId || null,
+    };
 
-  const galleryImages = selectedVariant?.images?.length ? selectedVariant.images : product.images || [];
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+    const existingIndex = cart.findIndex(
+      (item) =>
+        item.variantId === cartItem.variantId && item.planId === cartItem.planId
+    );
+
+    if (existingIndex > -1) {
+      cart[existingIndex].quantity += 1;
+    } else {
+      cart.push(cartItem);
+    }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+    alert("Product successfully added to cart!");
+  };
+
+  // ==================== LOADING & ERROR STATES ====================
+  if (loading)
+    return <div className="text-center py-12">Loading product...</div>;
+  if (error)
+    return <div className="text-center py-12 text-red-600">{error}</div>;
+  if (!product)
+    return <div className="text-center py-12">No product data</div>;
+
+  const galleryImages = selectedVariant?.images?.length
+    ? selectedVariant.images
+    : product.images || [];
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-8 md:grid md:grid-cols-3 gap-10">
@@ -106,7 +152,9 @@ export default function ProductPage() {
         {/* Product Title */}
         <div>
           <h1 className="text-3xl font-semibold">{product.name}</h1>
-          <p className="text-sm text-gray-500 mt-1">Sold by: {product.seller || "—"}</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Sold by: {product.seller || "—"}
+          </p>
         </div>
 
         {/* Price Card */}
@@ -121,10 +169,17 @@ export default function ProductPage() {
                   ₹{Number(product.mrp).toLocaleString()}
                 </span>
                 <span className="text-green-600 font-semibold text-sm">
-                  Save ₹{(product.mrp - (selectedVariant?.price || product.price)).toLocaleString()}
+                  Save ₹
+                  {(product.mrp - (selectedVariant?.price || product.price)).toLocaleString()}
                 </span>
                 <span className="text-green-600 font-semibold text-sm">
-                  ({Math.round(((product.mrp - (selectedVariant?.price || product.price)) / product.mrp) * 100)}% off)
+                  (
+                  {Math.round(
+                    ((product.mrp - (selectedVariant?.price || product.price)) /
+                      product.mrp) *
+                      100
+                  )}
+                  % off)
                 </span>
               </div>
             </div>
@@ -144,11 +199,13 @@ export default function ProductPage() {
                         key={variantId}
                         onClick={() => handleChooseVariantById(variantId)}
                         className={`px-3 py-1 rounded-full text-sm border transition flex items-center gap-2 ${
-                          isActive ? "bg-sky-600 text-white border-sky-600 shadow" : "bg-white text-gray-700 border-gray-200"
+                          isActive
+                            ? "bg-sky-600 text-white border-sky-600 shadow"
+                            : "bg-white text-gray-700 border-gray-200"
                         }`}
                       >
                         <span
-                          className="w-3 h-3 rounded-full border"
+                          className="w-4 h-4 rounded-full border"
                           style={{
                             background:
                               color?.toLowerCase().includes("black")
@@ -182,14 +239,19 @@ export default function ProductPage() {
                           String(v.storage) === String(storage) &&
                           (selectedVariant?.color ? v.color === selectedVariant.color : true)
                       ) || product.variants.find((v) => String(v.storage) === String(storage));
-                    const isActive = selectedVariant && String(selectedVariant.storage) === String(storage);
+                    const isActive =
+                      selectedVariant && String(selectedVariant.storage) === String(storage);
 
                     return (
                       <button
                         key={storage}
-                        onClick={() => matchVariant && handleChooseVariantById(matchVariant.variantId)}
+                        onClick={() =>
+                          matchVariant && handleChooseVariantById(matchVariant.variantId)
+                        }
                         className={`px-3 py-1 rounded-full text-sm border transition ${
-                          isActive ? "bg-sky-600 text-white border-sky-600 shadow" : "bg-white text-gray-700 border-gray-200"
+                          isActive
+                            ? "bg-sky-600 text-white border-sky-600 shadow"
+                            : "bg-white text-gray-700 border-gray-200"
                         }`}
                       >
                         {storage} GB
@@ -206,18 +268,25 @@ export default function ProductPage() {
         <div>
           <h3 className="text-xl font-semibold mb-3">Available EMI Plans</h3>
           <EMIPlanList
-            plans={selectedVariant?.emiPlans || []} // ✅ Variant EMI with additional cashback
+            plans={emiPlansWithCashback}
             selected={selectedPlan}
             onChange={setSelectedPlan}
           />
         </div>
 
-        {/* Proceed Button */}
-        <div>
+        {/* Add to Cart & Proceed Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 mt-4">
+          <button
+            onClick={handleAddToCart}
+            className="w-full sm:w-1/2 py-4 bg-yellow-500 text-white font-semibold text-lg rounded-xl shadow hover:bg-yellow-600 transition"
+          >
+            Add to Cart
+          </button>
+
           <button
             onClick={handleProceed}
             disabled={!selectedPlan}
-            className="w-full py-4 bg-green-600 text-white font-semibold text-lg rounded-xl shadow hover:bg-green-700 transition disabled:opacity-50"
+            className="w-full sm:w-1/2 py-4 bg-green-600 text-white font-semibold text-lg rounded-xl shadow hover:bg-green-700 transition disabled:opacity-50"
           >
             Proceed with EMI
           </button>

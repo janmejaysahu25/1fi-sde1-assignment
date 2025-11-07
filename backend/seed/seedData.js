@@ -1,5 +1,5 @@
 /**
- * ✅ Seed script for 1Fi assignment (Final & Corrected Version with variant EMI)
+ * ✅ Fully Updated Seed Script for 1Fi Assignment
  */
 
 require("dotenv").config();
@@ -35,9 +35,9 @@ const generateEmiPlans = (price, cashback = 0) => {
   });
 };
 
-// ----------------------------------------------------
+// ---------------------------
 // PRODUCT DATA
-// ----------------------------------------------------
+// ---------------------------
 const products = [
   {
     name: "Apple iPhone 17 Pro",
@@ -243,26 +243,28 @@ const products = [
   },
 ];
 
-// ----------------------------------------------------
-// Add product price/mrp & variant EMI
-// ----------------------------------------------------
+// ---------------------------
+// Add price, mrp, EMI, and ensure specs for variants
+// ---------------------------
 products.forEach((product) => {
   const minPrice = Math.min(...product.variants.map((v) => v.price));
   const maxMRP = Math.max(...product.variants.map((v) => v.price));
 
-  product.price = minPrice; // main product price
-  product.mrp = maxMRP;     // main product MRP
+  product.price = minPrice;
+  product.mrp = maxMRP;
 
-  // Add EMI plans for each variant
+  product.specs = product.specs || {};
+
   product.variants = product.variants.map((variant) => ({
     ...variant,
+    specs: variant.specs || { ...product.specs },
     emiPlans: generateEmiPlans(variant.price, variant.cashbackAmount || 0),
   }));
 });
 
-// ----------------------------------------------------
+// ---------------------------
 // SEED FUNCTION
-// ----------------------------------------------------
+// ---------------------------
 const seed = async () => {
   try {
     await connectDB(MONGODB_URI);
