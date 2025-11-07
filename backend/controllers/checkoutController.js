@@ -10,7 +10,6 @@ exports.createOrder = async (req, res) => {
     console.log("--- createOrder: incoming req.body ---");
     console.log(req.body);
 
-    // ✅ Basic validation
     if (!productSlug || !variantId || !planId || !customer) {
       return res.status(400).json({
         success: false,
@@ -18,7 +17,6 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    // ✅ Check if customer is registered
     const existingCustomer = await Customer.findOne({ customerId: customer.customerId });
     if (!existingCustomer) {
       return res.status(401).json({
@@ -27,19 +25,16 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    // ✅ Fetch product by slug
     const product = await Product.findOne({ slug: productSlug });
     if (!product) {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
 
-    // ✅ Find variant
     const matchedVariant = product.variants.find((v) => v.variantId === variantId);
     if (!matchedVariant) {
       return res.status(404).json({ success: false, message: "Variant not found" });
     }
 
-    // ✅ Find EMI plan
     const matchedPlan = matchedVariant.emiPlans.find((p) => p.planId === planId);
     if (!matchedPlan) {
       console.log("Available plans:", matchedVariant.emiPlans.map((p) => p.planId));
@@ -51,7 +46,6 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    // ✅ Build order object
     const order = new Order({
       orderId: nanoid(10),
       productSlug,
@@ -81,7 +75,6 @@ exports.createOrder = async (req, res) => {
       status: "Pending",
     });
 
-    // ✅ Save order
     await order.save();
 
     res.status(201).json({

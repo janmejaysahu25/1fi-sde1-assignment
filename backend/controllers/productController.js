@@ -50,9 +50,7 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
-// -----------------------------
-// GET PRODUCT BY SLUG
-// -----------------------------
+
 exports.getProductBySlug = async (req, res) => {
   try {
     const slug = req.params.slug;

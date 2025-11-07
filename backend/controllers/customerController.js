@@ -2,7 +2,6 @@ const Customer = require("../models/Customer");
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcrypt");
 
-// =================== SIGNUP ===================
 exports.signup = async (req, res) => {
   try {
     const { name, email, password, mobile } = req.body;
@@ -32,7 +31,6 @@ exports.signup = async (req, res) => {
   }
 };
 
-// =================== SIGNIN ===================
 exports.signin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -74,8 +72,6 @@ exports.signin = async (req, res) => {
 
 
 exports.logout = (req, res) => {
-  // If you are using token-based auth, frontend should remove token from localStorage
-  // Optionally, you can blacklist token here if using JWT
   return res.status(200).json({
     success: true,
     message: "Logged out successfully",

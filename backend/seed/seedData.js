@@ -1,6 +1,4 @@
-/**
- * ✅ Fully Updated Seed Script for 1Fi Assignment
- */
+
 
 require("dotenv").config();
 const connectDB = require("../config/db");
@@ -9,10 +7,8 @@ const Product = require("../models/Product");
 const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost:27017/1fi_assignment";
 
-// Helper to get local image path
 const localImg = (file) => `/products/${file}`;
 
-// EMI template
 const emiTemplate = [
   { tenureMonths: 3, interestRatePercent: 0 },
   { tenureMonths: 6, interestRatePercent: 0 },
@@ -20,7 +16,6 @@ const emiTemplate = [
   { tenureMonths: 12, interestRatePercent: 8 },
 ];
 
-// Generate EMI plans for a given price and optional cashback
 const generateEmiPlans = (price, cashback = 0) => {
   return emiTemplate.map((plan) => {
     const totalPayable = Math.round(price * (1 + plan.interestRatePercent / 100));
@@ -35,15 +30,12 @@ const generateEmiPlans = (price, cashback = 0) => {
   });
 };
 
-// ---------------------------
-// PRODUCT DATA
-// ---------------------------
 const products = [
   {
     name: "Apple iPhone 17 Pro",
     slug: "apple-iphone-17-pro",
     brand: "Apple",
-    seller: "Balaji Infocom",
+    seller: "EMI Plans Backed by Mutual Funds",
     highlights: [
       "6.7-inch OLED Display",
       "256 GB Storage",
@@ -121,7 +113,7 @@ const products = [
     name: "Samsung Galaxy S24 Ultra (Phantom Black, 256 GB)",
     slug: "samsung-galaxy-s24-ultra-phantom-black-256-gb",
     brand: "Samsung",
-    seller: "BigBillionDealz",
+    seller: "EMI Plans Backed by Mutual Funds",
     highlights: [
       "12 GB RAM | 256 GB ROM",
       "6.8-inch Quad HD+ AMOLED Display",
@@ -183,7 +175,7 @@ const products = [
     name: "Google Pixel X (Storm Blue, 128 GB)",
     slug: "google-pixel-x-storm-blue-128-gb",
     brand: "Google",
-    seller: "PixelStore",
+    seller: "EMI Plans Backed by Mutual Funds",
     highlights: [
       "6.4-inch OLED Display",
       "128 GB Storage",
@@ -243,9 +235,6 @@ const products = [
   },
 ];
 
-// ---------------------------
-// Add price, mrp, EMI, and ensure specs for variants
-// ---------------------------
 products.forEach((product) => {
   const minPrice = Math.min(...product.variants.map((v) => v.price));
   const maxMRP = Math.max(...product.variants.map((v) => v.price));
@@ -262,9 +251,6 @@ products.forEach((product) => {
   }));
 });
 
-// ---------------------------
-// SEED FUNCTION
-// ---------------------------
 const seed = async () => {
   try {
     await connectDB(MONGODB_URI);
