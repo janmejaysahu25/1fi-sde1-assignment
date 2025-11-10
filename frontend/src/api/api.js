@@ -1,11 +1,11 @@
 import axios from "axios";
 
-// ==================== CONFIG ====================
-// Use .env variable for backend URL in production
-// Fallback to localhost for local dev
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000/api";
+// ✅ Base URL: Use .env value on Vercel, fallback to Render backend (NOT localhost)
+const API_BASE =
+  import.meta.env.VITE_API_BASE ||
+  "https://onefi-sde1-assignment-1.onrender.com/api";
 
-// Axios instance
+// ✅ Axios instance
 const api = axios.create({
   baseURL: API_BASE,
   headers: {
@@ -19,28 +19,21 @@ const api = axios.create({
 export const fetchProducts = async () => {
   try {
     const res = await api.get("/products");
-    // Backend returns { success: true, data: [...] }
-    return res.data?.data || [];
+    return res.data.data || res.data;
   } catch (err) {
-    console.error(
-      "❌ Error fetching products:",
-      err.response?.data || err.message
-    );
-    return []; // Return empty array instead of throwing, so frontend doesn't crash
+    console.error("❌ Error fetching products:", err.response?.data || err.message);
+    throw err;
   }
 };
 
-// Fetch single product by slug
+// Fetch product by slug
 export const fetchProductBySlug = async (slug) => {
   try {
     const res = await api.get(`/products/${slug}`);
-    return res.data?.data || null;
+    return res.data.data || res.data;
   } catch (err) {
-    console.error(
-      "❌ Error fetching product:",
-      err.response?.data || err.message
-    );
-    return null;
+    console.error("❌ Error fetching product:", err.response?.data || err.message);
+    throw err;
   }
 };
 
@@ -52,13 +45,14 @@ export const postCheckout = async (payload) => {
     const customerId = localStorage.getItem("customerId");
     if (!customerId) throw new Error("User not logged in / customerId missing");
 
-    const res = await api.post("/checkout", { ...payload, customerId });
+    const res = await api.post("/checkout", {
+      ...payload,
+      customerId,
+    });
+
     return res.data;
   } catch (err) {
-    console.error(
-      "❌ Error during checkout:",
-      err.response?.data || err.message
-    );
+    console.error("❌ Error during checkout:", err.response?.data || err.message);
     throw err;
   }
 };
@@ -70,17 +64,18 @@ export const signupUser = async (user) => {
   try {
     const res = await api.post("/auth/signup", user);
 
-    if (res.data?.success && res.data?.customerId) {
+    if (res.data.success && res.data.customerId) {
       localStorage.setItem("customerId", res.data.customerId);
     }
 
     return res.data;
   } catch (err) {
-    console.error(
-      "❌ Error signing up:",
-      err.response?.data || err.message
-    );
-    return { success: false, error: err.response?.data?.error || "Server error during signup" };
+    console.error("❌ Error signing up:", err.response?.data || err.message);
+
+    return {
+      success: false,
+      error: err.response?.data?.error || "Server error during signup",
+    };
   }
 };
 
@@ -89,17 +84,18 @@ export const loginUser = async (credentials) => {
   try {
     const res = await api.post("/auth/signin", credentials);
 
-    if (res.data?.success && res.data?.customerId) {
+    if (res.data.success && res.data.customerId) {
       localStorage.setItem("customerId", res.data.customerId);
     }
 
     return res.data;
   } catch (err) {
-    console.error(
-      "❌ Error logging in:",
-      err.response?.data || err.message
-    );
-    return { success: false, error: err.response?.data?.error || "Server error during login" };
+    console.error("❌ Error logging in:", err.response?.data || err.message);
+
+    return {
+      success: false,
+      error: err.response?.data?.error || "Server error during login",
+    };
   }
 };
 
